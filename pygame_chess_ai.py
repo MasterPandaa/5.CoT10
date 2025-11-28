@@ -1,5 +1,6 @@
-import sys
 import random
+import sys
+
 import pygame
 
 # Game configuration
@@ -19,22 +20,32 @@ BG_PANEL = (30, 30, 30)
 
 # Piece Unicode mapping
 UNICODE_PIECES = {
-    'wK': '\u2654', 'wQ': '\u2655', 'wR': '\u2656', 'wB': '\u2657', 'wN': '\u2658', 'wP': '\u2659',
-    'bK': '\u265A', 'bQ': '\u265B', 'bR': '\u265C', 'bB': '\u265D', 'bN': '\u265E', 'bP': '\u265F'
+    "wK": "\u2654",
+    "wQ": "\u2655",
+    "wR": "\u2656",
+    "wB": "\u2657",
+    "wN": "\u2658",
+    "wP": "\u2659",
+    "bK": "\u265a",
+    "bQ": "\u265b",
+    "bR": "\u265c",
+    "bB": "\u265d",
+    "bN": "\u265e",
+    "bP": "\u265f",
 }
 
 # Piece values for AI capture priority
 PIECE_VALUES = {
-    'K': 10000,
-    'Q': 900,
-    'R': 500,
-    'B': 330,
-    'N': 320,
-    'P': 100,
+    "K": 10000,
+    "Q": 900,
+    "R": 500,
+    "B": 330,
+    "N": 320,
+    "P": 100,
 }
 
-HUMAN_COLOR = 'w'  # White human
-AI_COLOR = 'b'     # Black AI
+HUMAN_COLOR = "w"  # White human
+AI_COLOR = "b"  # Black AI
 
 
 def create_initial_board():
@@ -43,14 +54,14 @@ def create_initial_board():
 
     # Place pawns
     for c in range(COLS):
-        board[6][c] = 'wP'
-        board[1][c] = 'bP'
+        board[6][c] = "wP"
+        board[1][c] = "bP"
 
     # Place other pieces
-    order = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+    order = ["R", "N", "B", "Q", "K", "B", "N", "R"]
     for c, p in enumerate(order):
-        board[7][c] = 'w' + p
-        board[0][c] = 'b' + p
+        board[7][c] = "w" + p
+        board[0][c] = "b" + p
 
     return board
 
@@ -87,25 +98,44 @@ def generate_moves_for_piece(board, r, c):
         return []
     color, kind = piece[0], piece[1]
 
-    if kind == 'P':
+    if kind == "P":
         return generate_pawn_moves(board, r, c, color)
-    elif kind == 'N':
+    elif kind == "N":
         return generate_knight_moves(board, r, c, color)
-    elif kind == 'B':
-        return generate_sliding_moves(board, r, c, color, directions=[(-1, -1), (-1, 1), (1, -1), (1, 1)])
-    elif kind == 'R':
-        return generate_sliding_moves(board, r, c, color, directions=[(-1, 0), (1, 0), (0, -1), (0, 1)])
-    elif kind == 'Q':
-        return generate_sliding_moves(board, r, c, color, directions=[(-1, -1), (-1, 1), (1, -1), (1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)])
-    elif kind == 'K':
+    elif kind == "B":
+        return generate_sliding_moves(
+            board, r, c, color, directions=[(-1, -1), (-1, 1), (1, -1), (1, 1)]
+        )
+    elif kind == "R":
+        return generate_sliding_moves(
+            board, r, c, color, directions=[(-1, 0), (1, 0), (0, -1), (0, 1)]
+        )
+    elif kind == "Q":
+        return generate_sliding_moves(
+            board,
+            r,
+            c,
+            color,
+            directions=[
+                (-1, -1),
+                (-1, 1),
+                (1, -1),
+                (1, 1),
+                (-1, 0),
+                (1, 0),
+                (0, -1),
+                (0, 1),
+            ],
+        )
+    elif kind == "K":
         return generate_king_moves(board, r, c, color)
     return []
 
 
 def generate_pawn_moves(board, r, c, color):
     moves = []
-    dir_step = -1 if color == 'w' else 1
-    start_row = 6 if color == 'w' else 1
+    dir_step = -1 if color == "w" else 1
+    start_row = 6 if color == "w" else 1
 
     # Forward 1
     nr = r + dir_step
@@ -128,7 +158,16 @@ def generate_pawn_moves(board, r, c, color):
 
 def generate_knight_moves(board, r, c, color):
     moves = []
-    for dr, dc in [(-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, -2), (1, 2), (2, -1), (2, 1)]:
+    for dr, dc in [
+        (-2, -1),
+        (-2, 1),
+        (-1, -2),
+        (-1, 2),
+        (1, -2),
+        (1, 2),
+        (2, -1),
+        (2, 1),
+    ]:
         nr, nc = r + dr, c + dc
         if not in_bounds(nr, nc):
             continue
@@ -176,9 +215,9 @@ def make_move(board, move):
     new_board[r][c] = None
 
     # Pawn promotion (auto-queen)
-    if piece and piece[1] == 'P':
-        if (piece[0] == 'w' and nr == 0) or (piece[0] == 'b' and nr == ROWS - 1):
-            new_board[nr][nc] = piece[0] + 'Q'
+    if piece and piece[1] == "P":
+        if (piece[0] == "w" and nr == 0) or (piece[0] == "b" and nr == ROWS - 1):
+            new_board[nr][nc] = piece[0] + "Q"
     return new_board
 
 
@@ -214,14 +253,18 @@ def draw_board(surface):
     for r in range(ROWS):
         for c in range(COLS):
             color = LIGHT if (r + c) % 2 == 0 else DARK
-            pygame.draw.rect(surface, color, (c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE))
+            pygame.draw.rect(
+                surface, color, (c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+            )
 
 
 def draw_highlights(surface, selected, moves_for_selected):
     if selected:
         sr, sc = selected
         # selection outline
-        pygame.draw.rect(surface, SELECTION, (sc * SQ_SIZE, sr * SQ_SIZE, SQ_SIZE, SQ_SIZE), 4)
+        pygame.draw.rect(
+            surface, SELECTION, (sc * SQ_SIZE, sr * SQ_SIZE, SQ_SIZE, SQ_SIZE), 4
+        )
         # move hints
         for (_, _), (mr, mc) in moves_for_selected:
             center = (mc * SQ_SIZE + SQ_SIZE // 2, mr * SQ_SIZE + SQ_SIZE // 2)
@@ -235,7 +278,9 @@ def draw_pieces(surface, board, font):
             if piece:
                 text = UNICODE_PIECES[piece]
                 img = font.render(text, True, TEXT_COLOR)
-                rect = img.get_rect(center=(c * SQ_SIZE + SQ_SIZE // 2, r * SQ_SIZE + SQ_SIZE // 2))
+                rect = img.get_rect(
+                    center=(c * SQ_SIZE + SQ_SIZE // 2, r * SQ_SIZE + SQ_SIZE // 2)
+                )
                 surface.blit(img, rect)
 
 
@@ -259,22 +304,22 @@ def no_moves_left(board, color):
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption('Pygame Chess vs AI (Simple)')
+    pygame.display.set_caption("Pygame Chess vs AI (Simple)")
 
     # Use a large font supporting Unicode chess glyphs
     # Try several common fonts across platforms, fallback to default
     candidate_fonts = [
-        'Segoe UI Symbol',      # Windows
-        'Arial Unicode MS',     # Windows/Office
-        'Noto Sans Symbols2',   # Google Noto
-        'DejaVu Sans',          # Linux/macOS
-        None                    # default fallback
+        "Segoe UI Symbol",  # Windows
+        "Arial Unicode MS",  # Windows/Office
+        "Noto Sans Symbols2",  # Google Noto
+        "DejaVu Sans",  # Linux/macOS
+        None,  # default fallback
     ]
     chosen = None
     for fname in candidate_fonts:
         try:
             font = pygame.font.SysFont(fname, SQ_SIZE - 12)
-            test_img = font.render(UNICODE_PIECES['wK'], True, (0, 0, 0))
+            test_img = font.render(UNICODE_PIECES["wK"], True, (0, 0, 0))
             if test_img.get_width() > 0:
                 chosen = fname
                 break
@@ -286,12 +331,12 @@ def main():
     clock = pygame.time.Clock()
 
     board = create_initial_board()
-    current_turn = 'w'
+    current_turn = "w"
     selected = None
     moves_for_selected = []
     running = True
     game_over = False
-    winner_text = ''
+    winner_text = ""
 
     while running:
         clock.tick(FPS)
@@ -300,7 +345,11 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not game_over:
+            if (
+                event.type == pygame.MOUSEBUTTONDOWN
+                and event.button == 1
+                and not game_over
+            ):
                 if current_turn == HUMAN_COLOR:
                     pos = pos_from_mouse(*event.pos)
                     if not pos:
@@ -316,7 +365,10 @@ def main():
                             moves_for_selected = []
                     else:
                         # Try to move if clicked destination matches available moves
-                        possible = {(dst_r, dst_c): mv for (src, (dst_r, dst_c)) in moves_for_selected}
+                        possible = {
+                            (dst_r, dst_c): mv
+                            for (src, (dst_r, dst_c)) in moves_for_selected
+                        }
                         if (r, c) in possible:
                             mv = possible[(r, c)]
                             board = make_move(board, mv)
@@ -339,13 +391,13 @@ def main():
             mv = choose_ai_move(board, AI_COLOR)
             if mv is None:
                 game_over = True
-                winner_text = 'White wins! (Black has no moves)'
+                winner_text = "White wins! (Black has no moves)"
             else:
                 board = make_move(board, mv)
                 current_turn = HUMAN_COLOR
                 if no_moves_left(board, HUMAN_COLOR):
                     game_over = True
-                    winner_text = 'Black wins! (White has no moves)'
+                    winner_text = "Black wins! (White has no moves)"
 
         # Render
         draw_board(screen)
@@ -356,8 +408,10 @@ def main():
             overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 140))
             screen.blit(overlay, (0, 0))
-            end_font = pygame.font.SysFont('Arial', 36)
-            msg = end_font.render(winner_text + '  (Press ESC to quit)', True, (255, 255, 255))
+            end_font = pygame.font.SysFont("Arial", 36)
+            msg = end_font.render(
+                winner_text + "  (Press ESC to quit)", True, (255, 255, 255)
+            )
             rect = msg.get_rect(center=(WIDTH // 2, HEIGHT // 2))
             screen.blit(msg, rect)
 
@@ -372,5 +426,5 @@ def main():
     sys.exit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
